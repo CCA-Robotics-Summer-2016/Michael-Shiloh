@@ -1,3 +1,16 @@
+/*
+ * Using an ultrasonic distance measuring sensor mounted on a servo motor, 
+ * survey the space around 
+ * and figure out the best path forward
+ * 
+ * 6/17/16 - MS - fixed some bugs, added print()
+ * 6/15/16 - MS - Initial coding
+ * 
+ */
+
+
+
+
 #include <Servo.h>
 
 // Global array of measurements
@@ -6,6 +19,7 @@ long averages[18];
 
 // the ultrasonic distance measuring sensor sits on top of this servo
 Servo myServo;
+const int servoPin = 9;
 
 // ultrasonic distance measuring sensor
 const int trigPin = 12;
@@ -23,10 +37,14 @@ const int in2 = 2;
 
 // sweep 180 degrees and populate the measurements array
 void sweepAndMeasure() {
+  Serial.println("Hello from sweepAndMeasure");
 
+  // VERY IMPORTANT: Note that degree = degree++ is
+  // worse than unnecessary as it causes problems
   for (int degree = 0; degree < 180; degree++) {
 
     myServo.write(degree);
+    delay(15);
 
     measurements[degree] = measureDistance();
   }
@@ -39,6 +57,7 @@ void sweepAndMeasure() {
 
 long measureDistance() {
   long myDuration, distance;
+  Serial.println("Hello from measureDistance");
 
   // measure how far anything is from us
   // send the pulse
@@ -61,6 +80,9 @@ long measureDistance() {
 void setup() {
 
   Serial.begin (9600);
+  Serial.println("hello from michaels program version 0.1");
+
+  myServo.attach(servoPin);
 
   // pins for the ultrasonic distance measuring sensor
   pinMode(trigPin, OUTPUT);
@@ -78,38 +100,42 @@ void setup() {
   // Set the speed to 100, which is pretty slow
   analogWrite (enable1, 100);
   analogWrite (enable2, 100);
-}
-void loop() {
 
+  // later on, move these to loop()
   // look around and see what's nearby
   sweepAndMeasure();
 
   // look at measurements in 10 degree chunks
   averageInTenDegreeChunks();
-
+}
+void loop() {
 
   // finally decide where to go
-
 
 }
 
 void averageInTenDegreeChunks() {
+  Serial.println("Hello from averageInTenDegreeChunks");
 
   for (int degree = 0; degree < 180; degree = degree + 10) {
 
-    averageTheseTen(degree);
+    averages[degree / 10] = averageTheseTen(degree);
 
   }
 }
 
 int averageTheseTen ( int startHere ) {
+
+  Serial.println("Hello from averageTheseTen");
   int sum = 0;
   int validMeasurements = 10;
   int average;
 
-  for (int degree = startHere; degree < startHere + 10; degree = degree ++) {
+  for (int degree = startHere; degree < startHere + 10; degree ++) {
+    Serial.print(measurements[degree]);
+    Serial.print("\t");
     if (-1 == measurements[degree] ) {
-      // skip this measuremnt
+      // skip this measurement
       validMeasurements--;
     } else {
       sum = sum + measurements[degree];
@@ -117,15 +143,14 @@ int averageTheseTen ( int startHere ) {
   }
 
   average = sum / validMeasurements;
-
+  Serial.print("average: ");
+  Serial.print(average);
+  Serial.print("\t");
+  Serial.print("valid measurements: ");
+  Serial.print(validMeasurements);
+  Serial.println("");
   return average;
 }
-
-
-
-
-
-
 
 
 
