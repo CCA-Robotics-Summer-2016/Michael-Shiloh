@@ -15,10 +15,13 @@
  http://www.arduino.cc/en/Tutorial/Knob
 */
 
+// Include the servo library
 #include <Servo.h>
 
+// Create the servo object
 Servo myservo;  // create servo object to control a servo
 
+// Declare some variables
 int potpin = 0;  // analog pin used to connect the potentiometer
 int val;    // variable to read the value from the analog pin
 
